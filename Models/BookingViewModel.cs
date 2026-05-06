@@ -10,4 +10,4 @@
         public string VenueLocation { get; set; }
         public int Capacity { get; set; }
     }
-}
+}  
