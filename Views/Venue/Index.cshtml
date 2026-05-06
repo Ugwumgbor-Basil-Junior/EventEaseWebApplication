@@ -4,50 +4,103 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<style>
+    .table-modern {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+        .table-modern th {
+            text-align: left;
+            padding: 12px 8px;
+            background-color: #f5f7fa;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .table-modern td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eaeef2;
+            vertical-align: middle;
+        }
+
+    .btn-sm {
+        background-color: #f0f0f0;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-right: 6px;
+        color: #2c3e50;
+    }
+
+        .btn-sm:hover {
+            background-color: #e0e0e0;
+            text-decoration: none;
+            color: #1a2a3a;
+        }
+
+    .create-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        background-color: #e7f0ff;
+        padding: 6px 16px;
+        border-radius: 25px;
+        text-decoration: none;
+        color: #0056b3;
+        font-weight: 500;
+    }
+
+        .create-link:hover {
+            background-color: #d4e4ff;
+            text-decoration: none;
+        }
+
+    th, td {
+        padding: 10px 8px;
+    }
+</style>
+
+<h1>Venues</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="create-link">+ Create New</a>
 </p>
-<table class="table">
+
+<table class="table-modern">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.VenueName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Location)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Capacity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageUrl)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.VenueName)</th>
+            <th>@Html.DisplayNameFor(model => model.Location)</th>
+            <th>@Html.DisplayNameFor(model => model.Capacity)</th>
+            <th>Image</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.VenueName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Capacity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageUrl)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.VenueID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.VenueID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.VenueID">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.VenueName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Location)</td>
+                <td>@Html.DisplayFor(modelItem => item.Capacity)</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="Venue image" style="max-width: 100%; border-radius: 8px;" />
+                    }
+                    else
+                    {
+                        <span>No image</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.VenueID" class="btn-sm">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.VenueID" class="btn-sm">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.VenueID" class="btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

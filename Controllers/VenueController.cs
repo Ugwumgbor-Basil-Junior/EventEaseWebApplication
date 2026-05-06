@@ -1,6 +1,8 @@
 ﻿using EventEase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace EventEase.Controllers
 {
@@ -29,8 +31,14 @@ namespace EventEase.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (venue.ImageFile != null)
+                {
+                    var blobUrl = await UploadImageToBlobAsync(venue.ImageFile);
+                    venue.ImageUrl = blobUrl;
+                }
                 _context.Add(venue);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Venue successfully created";
                 return RedirectToAction(nameof(Index));
             }
             return View(venue);
@@ -54,9 +62,34 @@ namespace EventEase.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(venue);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    if (venue.ImageFile != null)
+                    {
+                        var blobUrl = await UploadImageToBlobAsync(venue.ImageFile);
+                        venue.ImageUrl = blobUrl;
+                    }
+                    else
+                    {
+                        var existingVenue = await _context.Venue.AsNoTracking()
+                            .FirstOrDefaultAsync(v => v.VenueID == id);
+                        if (existingVenue != null)
+                        {
+                            venue.ImageUrl = existingVenue.ImageUrl;
+                        }
+                    }
+
+                    _context.Update(venue);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Venue updated successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!VenueExists(venue.VenueID))
+                        return NotFound();
+                    throw;
+                }
             }
             return View(venue);
         }
@@ -71,12 +104,13 @@ namespace EventEase.Controllers
             var hasBookings = await _context.Booking.AnyAsync(b => b.VenueID == id);
             if (hasBookings)
             {
-                ModelState.AddModelError("", "Cannot delete venue with existing bookings.");
-                return View("Index", await _context.Venue.ToListAsync());
+                TempData["ErrorMessage"] = "Cannot delete venue with existing bookings.";
+                return RedirectToAction(nameof(Index));
             }
 
             _context.Venue.Remove(venue);
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Venue successfully deleted";
             return RedirectToAction(nameof(Index));
         }
 
@@ -96,6 +130,42 @@ namespace EventEase.Controllers
             }
 
             return View(venue);
+        }
+
+        private async Task<string> UploadImageToBlobAsync(IFormFile imageFile)
+        {
+            var connectionString = "UseDevelopmentStorage=true";
+            var containerName = "venueimages";
+
+            var blobServiceClient = new BlobServiceClient(connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            await containerClient.CreateIfNotExistsAsync();
+            await containerClient.SetAccessPolicyAsync(PublicAccessType.Blob);
+
+            var fileExtension = Path.GetExtension(imageFile.FileName);
+            var blobName = Guid.NewGuid().ToString() + fileExtension;
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            var blobHttpHeaders = new BlobHttpHeaders
+            {
+                ContentType = imageFile.ContentType
+            };
+
+            using (var stream = imageFile.OpenReadStream())
+            {
+                await blobClient.UploadAsync(stream, new BlobUploadOptions
+                {
+                    HttpHeaders = blobHttpHeaders
+                });
+            }
+
+            return blobClient.Uri.ToString();
+        }
+
+        private bool VenueExists(int id)
+        {
+            return _context.Venue.Any(e => e.VenueID == id);
         }
     }
 }

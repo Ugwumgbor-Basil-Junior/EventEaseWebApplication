@@ -14,14 +14,20 @@ namespace EventEase.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var bookings = await _context.Booking
-                .Include(b => b.Event)
-                .Include(b => b.Venue)
-                .ToListAsync();
+            var bookings = _context.vw_BookingDetails.AsQueryable();
 
-            return View(bookings);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                bookings = bookings.Where(b =>
+                    b.BookingID.ToString().Contains(searchString) ||
+                    b.EventName.Contains(searchString)
+                );
+            }
+
+            ViewBag.CurrentFilter = searchString;
+            return View(await bookings.ToListAsync());
         }
 
         public IActionResult Create()
@@ -52,6 +58,7 @@ namespace EventEase.Controllers
             {
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Booking created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -106,6 +113,7 @@ namespace EventEase.Controllers
 
                     _context.Update(booking);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Booking updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -145,6 +153,7 @@ namespace EventEase.Controllers
             {
                 _context.Booking.Remove(booking);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Booking deleted successfully!";
             }
 
             return RedirectToAction(nameof(Index));

@@ -34,6 +34,7 @@ namespace EventEase.Controllers
             {
                 _context.Add(@event);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Event created successfully.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -64,6 +65,7 @@ namespace EventEase.Controllers
                 {
                     _context.Update(@event);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Event updated successfully.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
@@ -79,6 +81,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
+        // POE PART 2 - STEP 3: Confirm Deletion (GET)
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -92,6 +95,7 @@ namespace EventEase.Controllers
             return View(@event);
         }
 
+        // POE PART 2 STEP 3: Perform Deletion (POST) Logic to restrict the deletion of events associated with active bookings.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -99,8 +103,8 @@ namespace EventEase.Controllers
             var @event = await _context.Event.FindAsync(id);
             if (@event == null) return NotFound();
 
-            var isBooked = await _context.Booking.AnyAsync(b => b.EventID == id);
-            if (isBooked)
+            var hasBookings = await _context.Booking.AnyAsync(b => b.EventID == id);
+            if (hasBookings)
             {
                 TempData["ErrorMessage"] = "Cannot delete event with existing bookings.";
                 return RedirectToAction(nameof(Index));
