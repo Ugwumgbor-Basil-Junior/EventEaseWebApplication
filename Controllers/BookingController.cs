@@ -26,7 +26,7 @@ namespace EventEase.Controllers
                 );
             }
 
-            ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentFilter = searchString; 
             return View(await bookings.ToListAsync());
         }
 
