@@ -8,7 +8,6 @@ namespace EventEase.Models
         public int VenueID { get; set; }
 
         [Required]
-
         public string? VenueName { get; set; }
 
         [Required]
@@ -20,8 +19,7 @@ namespace EventEase.Models
 
         public string? ImageUrl { get; set; }
 
-        [NotMapped] 
-
+        [NotMapped]
         public IFormFile? ImageFile { get; set; }
     }
 }

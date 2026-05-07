@@ -8,45 +8,48 @@
 
 <h4>Venue</h4>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <input type="hidden" asp-for="VenueID" />
-            <input type="hidden" asp-for="ImageUrl" />
-            
+
             <div class="form-group">
                 <label asp-for="VenueName" class="control-label"></label>
                 <input asp-for="VenueName" class="form-control" />
                 <span asp-validation-for="VenueName" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group">
                 <label asp-for="Location" class="control-label"></label>
                 <input asp-for="Location" class="form-control" />
                 <span asp-validation-for="Location" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group">
                 <label asp-for="Capacity" class="control-label"></label>
                 <input asp-for="Capacity" class="form-control" />
                 <span asp-validation-for="Capacity" class="text-danger"></span>
             </div>
-            
+
+            <!-- Show current image -->
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
                 <div class="form-group">
-                    <label>Current Image</label><br />
-                    <img src="@Model.ImageUrl" alt="Current venue image" style="width: 150px; height: 150px; border-radius: 8px;" />
+                    <p>Current Image:</p>
+                    <img src="@Model.ImageUrl" alt="Venue Image" style="width:150px;height:auto;" />
                 </div>
             }
-            
+
+            <!-- Upload new image -->
             <div class="form-group">
-                <label asp-for="ImageFile" class="control-label">Upload New Image (Optional)</label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" type="file" />
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

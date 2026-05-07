@@ -4,6 +4,7 @@ namespace EventEase.Models
 {
     public class Booking
     {
+
         public int BookingID { get; set; }
 
         [Required]

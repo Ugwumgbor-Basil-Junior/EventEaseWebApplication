@@ -1,53 +1,113 @@
 ﻿@model IEnumerable<EventEase.Models.BookingViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Bookings";
 }
 
-<h1>Index</h1>
+<div class="container mt-5">
 
-<form asp-action="Index" method="get" class="mb-3">
-    <input type="text" name="searchString" value="@ViewBag.CurrentFilter" placeholder="Search by Booking ID or Event Name..." />
-    <input type="submit" value="Search" />
-    <a asp-action="Index">Clear</a>
-</form>
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold">Booking Overview</h2>
+            <small class="text-muted">View and manage all event bookings</small>
+        </div>
 
-<p> 
-    <a asp-action="Create">Create New</a>
-</p>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a asp-action="Create" class="btn btn-primary">
+                New Booking
+            </a>
+        </div>
+    </div>
 
-<!-- Consolidated View To Display Bookings More Efficiently -->
-<table class="table">
-    <thead>
-        <tr>
-            <th>Booking ID</th>
-            <th>Event Name</th>
-            <th>Event Date</th>
-            <th>Venue Name</th>
-            <th>Venue Location</th>
-            <th>Booking Date</th>
-            <th>Capacity</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+    <!-- Search -->
+    <form asp-action="Index" method="get" class="mb-4">
+        <input type="text"
+               name="searchString"
+               class="form-control"
+               placeholder="Search by Booking ID or Event Name..."
+               value="@Context.Request.Query["searchString"]" />
+    </form>
+
+    <!-- Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div class="alert alert-danger">
+                @error.ErrorMessage
+            </div>
+        }
+    }
+
+    <!-- Card List (NOT TABLE) -->
+    <div class="row">
+
         @foreach (var booking in Model)
         {
-            <tr>
-                <td>@booking.BookingID</td>
-                <td>@booking.EventName</td>
-                <td>@booking.EventDate.ToString("yyyy-MM-dd")</td>
-                <td>@booking.VenueName</td>
-                <td>@booking.VenueLocation</td>
-                <td>@booking.BookingDate.ToString("yyyy-MM-dd")</td>
-                <td>@booking.Capacity</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@booking.BookingID">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@booking.BookingID">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@booking.BookingID">Delete</a>
-                </td>
-            </tr>
+            <div class="col-md-6 mb-3">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+                                <h5 class="mb-1">Booking #@booking.BookingID</h5>
+
+                                <div class="text-muted small">
+                                    @booking.EventName • @booking.VenueName
+                                </div>
+
+                                <div class="small mt-2">
+                                    <div>Date: @booking.EventDate.ToString("dd MMM yyyy")</div>
+                                    <div>Location: @booking.Location</div>
+                                    <div>Capacity: @booking.Capacity</div>
+                                    <div>Booked: @booking.BookingDate.ToString("dd MMM yyyy")</div>
+                                </div>
+
+                            </div>
+
+                            <div class="text-end">
+
+                                <a asp-action="Details" asp-route-id="@booking.BookingID"
+                                       class="btn btn-sm btn-outline-primary mb-1">
+                                    View
+                                </a>
+
+                                <br />
+
+                                <a asp-action="Edit" asp-route-id="@booking.BookingID"
+                                       class="btn btn-sm btn-outline-warning mb-1">
+                                    Edit
+                                </a>
+
+                                <br />
+
+                                <a asp-action="Delete" asp-route-id="@booking.BookingID"
+                                       class="btn btn-sm btn-outline-danger">
+                                    Delete
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
         }
-    </tbody>
-</table>
-<!-- End of Update -->
+
+    </div>
+
+</div>
